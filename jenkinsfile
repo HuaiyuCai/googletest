@@ -1,0 +1,36 @@
+pipeline{
+    agent any
+    
+    options {
+		buildDiscarder(logRotator(numToKeepStr: '10'))
+	}
+
+	parameters {
+		booleanParam name: 'BUILD', defaultValue: true, description: 'Build what?'
+		booleanParam name: 'RUN_ANALYSIS', defaultValue: true, description: 'Run Static Code Analysis?'
+		booleanParam name: 'DEPLOY', defaultValue: true, description: 'Deploy Artifacts?'
+	}
+    stages {
+        stage('Build') {
+            when {
+                environment name: 'BUILD', value: 'true'
+            }
+            steps{
+                echo 'This is a build step, build googletest!!!' 
+                cmake arguments: '-G "Visual Studio 14 2015 Win64"', installation: 'InSearchPath'
+                cmakeBuild buildType: 'Release', cleanBuild: true, installation: 'InSearchPath', steps: [[withCmake: true]]
+            }
+        }
+        stage('Test') {
+            steps{
+                bat 'md test_md'
+                echo 'This is a test step, close sunny-ngrok!'  
+            }
+        }
+        stage('Deploy') {
+            steps{
+                echo 'This is a deploy step. Done'    
+            }
+        }
+    }
+}
